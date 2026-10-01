@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const setToken = useAuthStore((s) => s.setToken);
 
-  const handleLogin = async (e) => {
+    const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -22,13 +22,13 @@ export default function LoginPage() {
       
       const data = await res.json();
       
-      // Si el backend responde con error (ej: contraseña incorrecta)
+      // Si el backend responde con error
       if (!res.ok) {
         throw new Error(data.detail || 'Error al iniciar sesión');
       }
       
-      // Guardamos el token real que nos dio FastAPI y entramos al sistema
-      setToken(data.access_token);
+      // Guardamos el token directamente en el navegador y entramos
+      localStorage.setItem('manttoflow_token', data.access_token);
       navigate('/app');
       
     } catch (err) {
