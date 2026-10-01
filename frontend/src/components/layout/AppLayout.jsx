@@ -19,7 +19,7 @@ export default function AppLayout() {
     <div className="min-h-screen bg-slate-100 flex">
       <aside className="w-64 bg-slate-900 text-white flex flex-col p-4 fixed h-full">
         <div className="mb-8 px-4 py-4">
-          <h1 className="text-2xl font-bold text-sky-400">ManttoFlow</h1>
+          <h1 className="text-2xl font-bold text-sky-400">Khazad-Dum</h1>
         </div>
         <nav className="flex-1 space-y-2">
           <NavLink to="/app" end className={linkClass}>📊 Dashboard</NavLink>
