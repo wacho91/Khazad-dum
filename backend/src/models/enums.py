@@ -40,3 +40,9 @@ class MaintenanceType(str, enum.Enum):
     PREVENTIVE = "preventive"
     CORRECTIVE = "corrective"
     PREDICTIVE = "predictive"
+
+# === NUEVO ENUM PARA REPUESTOS ===
+class MovementType(str, enum.Enum):
+    IN = "in"           # Entrada por compra
+    OUT = "out"         # Salida por uso en orden de trabajo
+    ADJUSTMENT = "adjustment" # Ajuste de inventario
