@@ -53,7 +53,7 @@ export default function AssetsPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tenantId) return alert('No se encontró la empresa.');
     
@@ -69,7 +69,16 @@ export default function AssetsPage() {
       
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.detail || 'Error al crear el activo');
+        console.error("Error del backend:", errData); // <-- Esto nos dirá la verdad en la consola (F12)
+        
+        // Si FastAPI nos dice qué campo falta (Error 422), lo leemos bonito
+        let errorMsg = 'Error al crear el activo';
+        if (errData.detail && Array.isArray(errData.detail)) {
+          errorMsg = errData.detail.map(e => `Falta el campo: ${e.loc[e.loc.length - 1]}`).join(', ');
+        } else if (errData.detail) {
+          errorMsg = errData.detail;
+        }
+        throw new Error(errorMsg);
       }
       
       setForm({ name: '', asset_tag: '', location: '' });
