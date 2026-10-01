@@ -30,19 +30,24 @@ class WorkOrderStatus(str, enum.Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
-class WorkOrderPriority(str, enum.Enum):
+class PriorityLevel(str, enum.Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     URGENT = "urgent"
 
-class MaintenanceType(str, enum.Enum):
+class WorkOrderType(str, enum.Enum):
     PREVENTIVE = "preventive"
     CORRECTIVE = "corrective"
     PREDICTIVE = "predictive"
 
-# === NUEVO ENUM PARA REPUESTOS ===
 class MovementType(str, enum.Enum):
-    IN = "in"           # Entrada por compra
-    OUT = "out"         # Salida por uso en orden de trabajo
-    ADJUSTMENT = "adjustment" # Ajuste de inventario
+    IN = "in"
+    OUT = "out"
+    ADJUSTMENT = "adjustment"
+
+    class CostCategory(str, enum.Enum):
+    SPARE_PARTS = "spare_parts"   # Repuestos
+    LABOR = "labor"               # Mano de obra
+    SERVICES = "services"         # Servicios tercerizados
+    OTHERS = "others"             # Otros
