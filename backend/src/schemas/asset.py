@@ -14,7 +14,9 @@ from src.schemas.common import ORMModel
 
 
 class AssetBase(ORMModel):
-    qr_code: str = Field(..., min_length=1, max_length=64)
+    # === MODIFICADO: qr_code ahora es opcional ===
+    qr_code: str | None = Field(None, min_length=1, max_length=64)
+    # ==============================================
     asset_tag: str = Field(..., min_length=1, max_length=100)
     name: str = Field(..., min_length=1, max_length=200)
     description: str | None = None
