@@ -64,3 +64,11 @@ try:
     api_router.include_router(work_order_router)
 except ImportError:
     pass
+
+# === RUTA DE AUTENTICACIÓN ===
+try:
+    from .auth import router as auth_router
+    api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
+except ImportError as e:
+    print(f"Error cargando auth: {e}")
+# =============================
