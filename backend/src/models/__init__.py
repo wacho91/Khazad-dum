@@ -7,5 +7,5 @@ from src.models.enums import (
 )
 from src.models.location import Location
 from src.models.user import User
-from src.models.spare_part import SparePart
+from src.models.spare_part import SparePart, StockMovement
 from src.models.work_order import WorkOrder, CostEntry
