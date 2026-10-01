@@ -21,7 +21,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.config import settings
-from src.database import dispose_engine, ping
+# === MAGIA: Importamos engine y Base ===
+from src.database import dispose_engine, ping, engine, Base
+# === Importamos los modelos para que SQLAlchemy los detecte ===
+from src.models import Tenant, Asset, AssetStatusHistory
 from src.routes import api_router
 
 
@@ -33,13 +36,18 @@ logger = logging.getLogger("khazad-dum")
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Startup: verifica DB. Shutdown: cierra el pool asyncpg."""
+    """Startup: verifica DB y crea tablas. Shutdown: cierra el pool asyncpg."""
     logger.info("Starting %s (env=%s)", settings.APP_NAME, settings.ENV)
+    
+    # === MAGIA: Crear tablas en la base de datos de Neon.tech ===
     try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("✅ Tablas verificadas/creadas en la base de datos.")
         await ping()
         logger.info("Database connectivity OK")
     except Exception as exc:  # pragma: no cover
-        logger.warning("Database not reachable at startup: %s", exc)
+        logger.warning("Error al iniciar la base de datos: %s", exc)
 
     yield
 
