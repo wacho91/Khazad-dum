@@ -13,4 +13,5 @@ class AssetStatus(str, enum.Enum):
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
     SUPERVISOR = "supervisor"
-    TECNICO = "tecnico"
+    TECH = "tech"
+    VIEWER = "viewer"
