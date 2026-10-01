@@ -46,8 +46,15 @@ class MovementType(str, enum.Enum):
     OUT = "out"
     ADJUSTMENT = "adjustment"
 
-    class CostCategory(str, enum.Enum):
-    SPARE_PARTS = "spare_parts"   # Repuestos
-    LABOR = "labor"               # Mano de obra
-    SERVICES = "services"         # Servicios tercerizados
-    OTHERS = "others"             # Otros
+class CostCategory(str, enum.Enum):
+    SPARE_PARTS = "spare_parts"
+    LABOR = "labor"
+    SERVICES = "services"
+    OTHERS = "others"
+
+# Por si los agentes piden auditoría
+class AuditAction(str, enum.Enum):
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
+    STATUS_CHANGE = "status_change"
