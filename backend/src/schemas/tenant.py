@@ -33,5 +33,9 @@ class TenantUpdate(ORMModel):
 
 class TenantRead(TenantBase):
     id: uuid.UUID
+    plan: str | None = None  # O TenantPlan, dependiendo de cómo lo tengas
     created_at: datetime
-    updated_at: datetime
+    updated_at: datetime | None = None  # <--- ASEGÚRATE DE QUE SEA OPCIONAL
+    
+    class Config:
+        from_attributes = True
