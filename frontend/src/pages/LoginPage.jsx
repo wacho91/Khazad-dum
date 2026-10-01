@@ -9,15 +9,33 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const setToken = useAuthStore((s) => s.setToken);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simulamos el login para que puedas entrar al Dashboard rápido
-    setTimeout(() => {
-      setToken('dummy_token_dev');
+    try {
+      // Hacemos la petición real a tu backend en FastAPI
+      const res = await fetch('http://localhost:8000/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await res.json();
+      
+      // Si el backend responde con error (ej: contraseña incorrecta)
+      if (!res.ok) {
+        throw new Error(data.detail || 'Error al iniciar sesión');
+      }
+      
+      // Guardamos el token real que nos dio FastAPI y entramos al sistema
+      setToken(data.access_token);
       navigate('/app');
+      
+    } catch (err) {
+      alert(err.message);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
