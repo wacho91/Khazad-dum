@@ -19,14 +19,15 @@ class SparePart(Base):
     category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     manufacturer: Mapped[str | None] = mapped_column(String(150), nullable=True)
     part_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    
-    # === CAMBIO: unit_of_measure AHORA ES unit ===
     unit: Mapped[str] = mapped_column(String(30), default="UND", nullable=False)
-    # =============================================
     
     stock_actual: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
     stock_minimo: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
+    
+    # === CAMPOS DE COSTOS (Para que no falte ninguno) ===
+    unit_cost: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
     costo_promedio: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
+    # =====================================================
     
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
