@@ -22,7 +22,7 @@ class AssetBase(ORMModel):
     serial_number: str | None = Field(None, max_length=150)
     status: AssetStatus = AssetStatus.OPERATIONAL
     criticality: CriticalityLevel = CriticalityLevel.MEDIUM
-    location_id: uuid.UUID | None = None
+    location: str | None = None
     purchase_date: date | None = None
     purchase_cost: Decimal | None = Field(None, ge=0)
     currency: str = Field("USD", min_length=3, max_length=3)
@@ -44,7 +44,7 @@ class AssetUpdate(ORMModel):
     model: str | None = Field(None, max_length=150)
     serial_number: str | None = Field(None, max_length=150)
     criticality: CriticalityLevel | None = None
-    location_id: uuid.UUID | None = None
+    location: str | None = None
     purchase_date: date | None = None
     purchase_cost: Decimal | None = Field(None, ge=0)
     currency: str | None = Field(None, min_length=3, max_length=3)
