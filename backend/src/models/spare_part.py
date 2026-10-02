@@ -15,14 +15,14 @@ class SparePart(Base):
     
     sku: Mapped[str] = mapped_column(String(100), nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    
-    # === CAMPOS QUE FALTABAN ===
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     manufacturer: Mapped[str | None] = mapped_column(String(150), nullable=True)
     part_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    unit_of_measure: Mapped[str] = mapped_column(String(30), default="UND", nullable=False)
-    # ============================
+    
+    # === CAMBIO: unit_of_measure AHORA ES unit ===
+    unit: Mapped[str] = mapped_column(String(30), default="UND", nullable=False)
+    # =============================================
     
     stock_actual: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
     stock_minimo: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
