@@ -5,7 +5,6 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
 
 from pydantic import Field
 
@@ -14,9 +13,7 @@ from src.schemas.common import ORMModel
 
 
 class AssetBase(ORMModel):
-    # === MODIFICADO: qr_code ahora es opcional ===
     qr_code: str | None = Field(None, min_length=1, max_length=64)
-    # ==============================================
     asset_tag: str = Field(..., min_length=1, max_length=100)
     name: str = Field(..., min_length=1, max_length=200)
     description: str | None = None
@@ -31,7 +28,7 @@ class AssetBase(ORMModel):
     currency: str = Field("USD", min_length=3, max_length=3)
     useful_life_months: int | None = Field(None, gt=0)
     warranty_until: date | None = None
-    metadata_: dict[str, Any] = Field(default_factory=dict, alias="metadata")
+    # HEMOS ELIMINADO COMPLETAMENTE EL CAMPO METADATA_
 
 
 class AssetCreate(AssetBase):
@@ -53,7 +50,6 @@ class AssetUpdate(ORMModel):
     currency: str | None = Field(None, min_length=3, max_length=3)
     useful_life_months: int | None = Field(None, gt=0)
     warranty_until: date | None = None
-    metadata_: dict[str, Any] | None = Field(None, alias="metadata")
 
 
 class AssetRead(AssetBase):
