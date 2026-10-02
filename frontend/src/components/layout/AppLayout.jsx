@@ -24,7 +24,7 @@ export default function AppLayout() {
         <nav className="flex-1 space-y-2">
           <NavLink to="/app" end className={linkClass}>📊 Dashboard</NavLink>
           <NavLink to="/app/assets" className={linkClass}>🏭 Activos</NavLink>
-          <NavLink to="#" className={linkClass}>🔧 Repuestos</NavLink>
+          <NavLink to="/app/spare-parts" className={linkClass}>🔧 Repuestos</NavLink>
           <NavLink to="#" className={linkClass}>📋 Órdenes</NavLink>
         </nav>
         <div className="mt-auto">
