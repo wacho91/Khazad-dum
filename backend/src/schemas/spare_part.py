@@ -39,3 +39,20 @@ class SparePartRead(SparePartBase):
     tenant_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+
+    # === ESQUEMAS PARA LOS MOVIMIENTOS DE INVENTARIO (KARDEX) ===
+class StockMovementBase(ORMModel):
+    spare_part_id: uuid.UUID
+    work_order_id: uuid.UUID | None = None
+    movement_type: str
+    quantity: Decimal
+
+class StockMovementCreate(StockMovementBase):
+    pass
+
+class StockMovementRead(StockMovementBase):
+    id: uuid.UUID
+    tenant_id: uuid.UUID
+    created_at: datetime
+    class Config:
+        from_attributes = True
