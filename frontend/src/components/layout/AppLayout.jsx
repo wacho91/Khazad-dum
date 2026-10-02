@@ -25,7 +25,7 @@ export default function AppLayout() {
           <NavLink to="/app" end className={linkClass}>📊 Dashboard</NavLink>
           <NavLink to="/app/assets" className={linkClass}>🏭 Activos</NavLink>
           <NavLink to="/app/spare-parts" className={linkClass}>🔧 Repuestos</NavLink>
-          <NavLink to="#" className={linkClass}>📋 Órdenes</NavLink>
+          <NavLink to="/app/work-orders" className={linkClass}>📋 Órdenes</NavLink>
         </nav>
         <div className="mt-auto">
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400 hover:bg-red-900/50">
