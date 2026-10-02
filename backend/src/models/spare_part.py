@@ -12,16 +12,22 @@ class SparePart(Base):
     __tablename__ = "spare_parts"
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False)
+    
     sku: Mapped[str] = mapped_column(String(100), nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     
-    # === CAMPO QUE FALTABA ===
+    # === CAMPOS QUE FALTABAN ===
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    # =========================
+    category: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    manufacturer: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    part_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    unit_of_measure: Mapped[str] = mapped_column(String(30), default="UND", nullable=False)
+    # ============================
     
     stock_actual: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
     stock_minimo: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
     costo_promedio: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=Decimal("0"), nullable=False)
+    
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
