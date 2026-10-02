@@ -6,6 +6,8 @@ export default function AssetsPage() {
   const [assets, setAssets] = useState([]);
   const [tenantId, setTenantId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  // Agregamos 'location' al formulario
   const [form, setForm] = useState({ name: '', asset_tag: '', location: '' });
 
   const token = localStorage.getItem('manttoflow_token');
@@ -20,17 +22,15 @@ export default function AssetsPage() {
 
   const fetchInitialData = async () => {
     try {
-      // 1. Buscamos el ID de la empresa (Tenant) a la que perteneces
       const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!resTenants.ok) throw new Error('Error al obtener empresa');
       
       const tenantsData = await resTenants.json();
-      const tenants = tenantsData.items || tenantsData; // Por si viene paginado
+      const tenants = tenantsData.items || tenantsData; 
       
       if (tenants.length === 0) {
-        alert('No hay empresas registradas.');
         setLoading(false);
         return;
       }
@@ -38,7 +38,6 @@ export default function AssetsPage() {
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
 
-      // 2. Traemos los activos de esa empresa
       const resAssets = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/assets`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -53,13 +52,18 @@ export default function AssetsPage() {
     }
   };
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tenantId) return alert('No se encontró la empresa.');
     
+    const method = editingId ? 'PATCH' : 'POST';
+    const url = editingId 
+      ? `http://localhost:8000/api/v1/tenants/${tenantId}/assets/${editingId}`
+      : `http://localhost:8000/api/v1/tenants/${tenantId}/assets`;
+    
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets`, {
-        method: 'POST',
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -69,10 +73,8 @@ export default function AssetsPage() {
       
       if (!res.ok) {
         const errData = await res.json();
-        console.error("Error del backend:", errData); // <-- Esto nos dirá la verdad en la consola (F12)
-        
-        // Si FastAPI nos dice qué campo falta (Error 422), lo leemos bonito
-        let errorMsg = 'Error al crear el activo';
+        console.error("Error del backend:", errData);
+        let errorMsg = 'Error al guardar el activo';
         if (errData.detail && Array.isArray(errData.detail)) {
           errorMsg = errData.detail.map(e => `Falta el campo: ${e.loc[e.loc.length - 1]}`).join(', ');
         } else if (errData.detail) {
@@ -82,9 +84,37 @@ export default function AssetsPage() {
       }
       
       setForm({ name: '', asset_tag: '', location: '' });
-      fetchInitialData(); // Refrescamos la lista
+      setEditingId(null);
+      fetchInitialData(); 
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handleEdit = (asset) => {
+    setForm({
+      name: asset.name,
+      asset_tag: asset.asset_tag,
+      location: asset.location || ''
+    });
+    setEditingId(asset.id);
+  };
+
+  const handleCancelEdit = () => {
+    setForm({ name: '', asset_tag: '', location: '' });
+    setEditingId(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("¿Seguro que quieres eliminar este activo?")) return;
+    try {
+      await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      fetchInitialData();
+    } catch (err) {
+      alert("Error al eliminar");
     }
   };
 
@@ -99,41 +129,26 @@ export default function AssetsPage() {
         {/* Formulario */}
         <div className="md:col-span-1">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-semibold text-slate-800 mb-4">Nuevo Activo</h2>
+            <h2 className="text-xl font-semibold text-slate-800 mb-4">{editingId ? 'Editar Activo' : 'Nuevo Activo'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Nombre</label>
-                <input 
-                  type="text" required
-                  value={form.name}
-                  onChange={(e) => setForm({...form, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500"
-                  placeholder="Banda Transportadora 1"
-                />
+                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="Banda Transportadora 1" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Tag / Código</label>
-                <input 
-                  type="text" required
-                  value={form.asset_tag}
-                  onChange={(e) => setForm({...form, asset_tag: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500"
-                  placeholder="BANDA-001"
-                />
+                <input type="text" required value={form.asset_tag} onChange={(e) => setForm({...form, asset_tag: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="BANDA-001" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Ubicación</label>
-                <input 
-                  type="text"
-                  value={form.location}
-                  onChange={(e) => setForm({...form, location: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500"
-                  placeholder="Línea de Producción 1"
-                />
+                <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="Línea de Producción 1" />
               </div>
-              <button type="submit" className="w-full bg-sky-600 text-white py-2 rounded-lg font-semibold hover:bg-sky-700">
-                + Crear Activo
-              </button>
+              <div className="flex gap-2">
+                <button type="submit" className="w-full bg-sky-600 text-white py-2 rounded-lg font-semibold hover:bg-sky-700">
+                  {editingId ? '✓ Actualizar' : '+ Crear Activo'}
+                </button>
+                {editingId && <button type="button" onClick={handleCancelEdit} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-300">✕</button>}
+              </div>
             </form>
           </div>
         </div>
@@ -150,7 +165,7 @@ export default function AssetsPage() {
                       <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Nombre</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Ubicación</th>
-                      <th className="px-4 py-3 font-semibold text-slate-600">Estado</th>
+                      <th className="px-4 py-3 font-semibold text-slate-600 text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -159,10 +174,9 @@ export default function AssetsPage() {
                         <td className="px-4 py-3 font-medium text-slate-800">{asset.asset_tag}</td>
                         <td className="px-4 py-3 text-slate-600">{asset.name}</td>
                         <td className="px-4 py-3 text-slate-500">{asset.location || '—'}</td>
-                        <td className="px-4 py-3">
-                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
-                            {asset.status}
-                          </span>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">
+                          <button onClick={() => handleEdit(asset)} className="text-sky-600 hover:text-sky-800 font-medium mr-3">Editar</button>
+                          <button onClick={() => handleDelete(asset.id)} className="text-red-500 hover:text-red-700 font-medium">Eliminar</button>
                         </td>
                       </tr>
                     ))}
