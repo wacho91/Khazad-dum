@@ -23,7 +23,7 @@ class Asset(Base):
     serial_number: Mapped[str | None] = mapped_column(String(150), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default=AssetStatus.OPERATIONAL.value, nullable=False)
     criticality: Mapped[str] = mapped_column(String(50), default=CriticalityLevel.MEDIUM.value, nullable=False)
-    location_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("locations.id"), nullable=True)
+    location: Mapped[str | None] = mapped_column(String(200), nullable=True)
     purchase_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     purchase_cost: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
     currency: Mapped[str] = mapped_column(String(3), default="USD", nullable=False)
