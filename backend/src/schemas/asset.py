@@ -50,6 +50,7 @@ class AssetUpdate(ORMModel):
     currency: str | None = Field(None, min_length=3, max_length=3)
     useful_life_months: int | None = Field(None, gt=0)
     warranty_until: date | None = None
+    costo_acumulado: Decimal = Decimal("0")
 
 
 class AssetRead(AssetBase):
