@@ -269,11 +269,11 @@ export default function WorkOrdersPage() {
                   <select 
                     value={form.type}
                     onChange={(e) => setForm({...form, type: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-transparent text-slate-800"
                   >
                     <option 
                       value="corrective"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-transparent text-slate-800"
                       >
                         Correctivo
                       </option>
@@ -290,7 +290,7 @@ export default function WorkOrdersPage() {
                   <select 
                     value={form.priority}
                     onChange={(e) => setForm({...form, priority: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-transparent text-slate-800"
                   >
                     <option  value="low">Baja</option>
                     <option value="medium">Media</option>

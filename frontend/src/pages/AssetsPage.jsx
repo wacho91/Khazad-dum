@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePagination } from '../hooks/usePagination';
+
+import Pagination from '../components/ui/Pagination';
 import Swal from 'sweetalert2';
 
 export default function AssetsPage() {
@@ -12,6 +15,8 @@ export default function AssetsPage() {
   const [form, setForm] = useState({ name: '', asset_tag: '', location: '' });
 
   const token = localStorage.getItem('manttoflow_token');
+
+    const { currentItems, currentPage, totalPages, goToPage } = usePagination(assets, 8);
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
@@ -174,7 +179,7 @@ export default function AssetsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {assets.map((asset) => (
+                    {currentItems.map((asset) => (
                       <tr key={asset.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 font-medium text-slate-800">{asset.asset_tag}</td>
                         <td className="px-4 py-3 text-slate-600">{asset.name}</td>
@@ -188,6 +193,11 @@ export default function AssetsPage() {
                     ))}
                   </tbody>
                 </table>
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                onPageChange={goToPage} 
+              />
               </div>
             )}
           </div>
