@@ -106,10 +106,17 @@ async def delete_asset(
             status_code=status.HTTP_404_NOT_FOUND, detail="asset not found"
         )
     
-    # === MAGIA: Borramos el historial y OTs asociadas para que deje borrar la máquina ===
+    # === MAGIA: Borramos en orden de dependencias para no violar llaves foráneas ===
+    # 1. Borramos los movimientos de inventario (Kardex) asociados a las OTs de esta máquina
+    await db.execute(
+        text("DELETE FROM stock_movements WHERE work_order_id IN (SELECT id FROM work_orders WHERE asset_id = :asset_id)"),
+        {"asset_id": asset_id}
+    )
+    # 2. Borramos las OTs asociadas a esta máquina
     await db.execute(text("DELETE FROM work_orders WHERE asset_id = :asset_id"), {"asset_id": asset_id})
+    # 3. Borramos el historial de estados de la máquina
     await db.execute(text("DELETE FROM asset_status_history WHERE asset_id = :asset_id"), {"asset_id": asset_id})
-    # =====================================================================================
+    # ==============================================================================
     
     await db.delete(asset)
     await db.commit()
