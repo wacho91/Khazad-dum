@@ -114,38 +114,7 @@ async def close_work_order(
         # Magia: Si tiene unit_cost lo usa, si no, usa costo_promedio
         part_price = u_cost if u_cost > 0 else p_cost
         part_cost = Decimal(str(part_data.quantity)) * part_price
-        
-        # === DEBUG: Esto se imprimirá en tu terminal de backend ===
-        print(f"DEBUG CLOSE OT: Repuesto={part.name}, Cantidad={part_data.quantity}, Precio={part_price}, Costo={part_cost}")
-        # =========================================================
-        
         total_cost += part_cost
-
-        # Registramos el movimiento en el Kardex (Historial)
-        movement = StockMovement(
-            tenant_id=tenant_id,
-            spare_part_id=part.id,
-            work_order_id=wo.id,
-            movement_type="out", # Salida
-            quantity=part_data.quantity
-        )
-        db.add(movement)
-        part = await db.get(SparePart, part_data.spare_part_id)
-        if not part:
-            raise HTTPException(status_code=404, detail=f"Repuesto {part_data.spare_part_id} no encontrado")
-        
-        if part.stock_actual < part_data.quantity:
-            raise HTTPException(status_code=400, detail=f"Stock insuficiente para {part.name}. Solo hay {part.stock_actual}")
-        
-        # Descontamos de la bodega
-        part.stock_actual -= part_data.quantity
-        
-        # === MAGIA FINANCIERA CORREGIDA ===
-        # Si tiene unit_cost lo usa, si no, usa costo_promedio
-        part_price = part.unit_cost if part.unit_cost and part.unit_cost > 0 else part.costo_promedio
-        part_cost = part_data.quantity * part_price
-        total_cost += part_cost
-        # ==================================
 
         # Registramos el movimiento en el Kardex (Historial)
         movement = StockMovement(
@@ -176,7 +145,7 @@ async def close_work_order(
     await db.refresh(wo)
     return wo
 
-# === ENDPOINT: HISTORIAL DE COSTOS DE UNA MÁQUINA ===
+# === ENDPOINT: HISTORIAL DE COSTOS DE UNA MÁQUINA (Agrupado) ===
 @router.get("/{wo_id}/cost-breakdown", response_model=dict)
 async def get_cost_breakdown(
     tenant_id: uuid.UUID,
@@ -187,22 +156,30 @@ async def get_cost_breakdown(
     if not wo or wo.tenant_id != tenant_id:
         raise HTTPException(status_code=404, detail="OT no encontrada")
 
-    # Buscamos los repuestos usados en esta OT
+    # Buscamos los movimientos de inventario (Kardex) y los AGRUPAMOS por repuesto
     result = await db.execute(
-        select(StockMovement).where(StockMovement.work_order_id == wo_id)
+        select(
+            StockMovement.spare_part_id,
+            func.sum(StockMovement.quantity).label("total_qty")
+        ).where(StockMovement.work_order_id == wo_id)
+        .group_by(StockMovement.spare_part_id)
     )
-    movements = result.scalars().all()
+    grouped_movements = result.all()
 
     items = []
-    for mov in movements:
-        part = await db.get(SparePart, mov.spare_part_id)
+    for spare_part_id, total_qty in grouped_movements:
+        part = await db.get(SparePart, spare_part_id)
         if part:
+            # Forzamos cálculos limpios
             price = part.unit_cost if part.unit_cost and part.unit_cost > 0 else part.costo_promedio
+            price = Decimal(str(price)) if price else Decimal("0")
+            qty = Decimal(str(total_qty))
+            
             items.append({
                 "name": part.name,
-                "quantity": float(mov.quantity),
+                "quantity": float(qty),
                 "unit_price": float(price),
-                "total": float(mov.quantity * price)
+                "total": float(qty * price)
             })
 
     return {
