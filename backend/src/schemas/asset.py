@@ -29,6 +29,7 @@ class AssetBase(ORMModel):
     useful_life_months: int | None = Field(None, gt=0)
     warranty_until: date | None = None
     # HEMOS ELIMINADO COMPLETAMENTE EL CAMPO METADATA_
+    costo_acumulado: Decimal = Decimal("0")
 
 
 class AssetCreate(AssetBase):
