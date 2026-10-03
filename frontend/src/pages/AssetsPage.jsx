@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function AssetsPage() {
   const navigate = useNavigate();
@@ -7,16 +8,13 @@ export default function AssetsPage() {
   const [tenantId, setTenantId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
-  // Agregamos 'location' al formulario
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: '', asset_tag: '', location: '' });
 
   const token = localStorage.getItem('manttoflow_token');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) { navigate('/login'); return; }
     fetchInitialData();
   }, []);
 
@@ -30,10 +28,7 @@ export default function AssetsPage() {
       const tenantsData = await resTenants.json();
       const tenants = tenantsData.items || tenantsData; 
       
-      if (tenants.length === 0) {
-        setLoading(false);
-        return;
-      }
+      if (tenants.length === 0) { setLoading(false); return; }
       
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
@@ -54,8 +49,9 @@ export default function AssetsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!tenantId) return alert('No se encontró la empresa.');
+    if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
     
+    setSaving(true);
     const method = editingId ? 'PATCH' : 'POST';
     const url = editingId 
       ? `http://localhost:8000/api/v1/tenants/${tenantId}/assets/${editingId}`
@@ -64,16 +60,12 @@ export default function AssetsPage() {
     try {
       const res = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(form)
       });
       
       if (!res.ok) {
         const errData = await res.json();
-        console.error("Error del backend:", errData);
         let errorMsg = 'Error al guardar el activo';
         if (errData.detail && Array.isArray(errData.detail)) {
           errorMsg = errData.detail.map(e => `Falta el campo: ${e.loc[e.loc.length - 1]}`).join(', ');
@@ -83,20 +75,19 @@ export default function AssetsPage() {
         throw new Error(errorMsg);
       }
       
+      Swal.fire({ icon: 'success', title: editingId ? '¡Actualizado!' : '¡Creado!', timer: 1500, showConfirmButton: false });
       setForm({ name: '', asset_tag: '', location: '' });
       setEditingId(null);
       fetchInitialData(); 
     } catch (err) {
-      alert(err.message);
+      Swal.fire('Error', err.message, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleEdit = (asset) => {
-    setForm({
-      name: asset.name,
-      asset_tag: asset.asset_tag,
-      location: asset.location || ''
-    });
+    setForm({ name: asset.name, asset_tag: asset.asset_tag, location: asset.location || '' });
     setEditingId(asset.id);
   };
 
@@ -105,17 +96,30 @@ export default function AssetsPage() {
     setEditingId(null);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar este activo?")) return;
-    try {
-      await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      fetchInitialData();
-    } catch (err) {
-      alert("Error al eliminar");
-    }
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡No podrás revertir esta acción! El activo se eliminará permanentemente.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          Swal.fire('¡Eliminado!', 'El activo ha sido eliminado.', 'success');
+          fetchInitialData();
+        } catch (err) {
+          Swal.fire('Error', 'No se pudo eliminar.', 'error');
+        }
+      }
+    });
   };
 
   return (
@@ -144,8 +148,8 @@ export default function AssetsPage() {
                 <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="Línea de Producción 1" />
               </div>
               <div className="flex gap-2">
-                <button type="submit" className="w-full bg-sky-600 text-white py-2 rounded-lg font-semibold hover:bg-sky-700">
-                  {editingId ? '✓ Actualizar' : '+ Crear Activo'}
+                <button type="submit" disabled={saving} className="w-full bg-sky-600 text-white py-2 rounded-lg font-semibold hover:bg-sky-700 disabled:opacity-50">
+                  {saving ? 'Guardando...' : (editingId ? '✓ Actualizar' : '+ Crear Activo')}
                 </button>
                 {editingId && <button type="button" onClick={handleCancelEdit} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-300">✕</button>}
               </div>
@@ -165,9 +169,7 @@ export default function AssetsPage() {
                       <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Nombre</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Ubicación</th>
-                      {/* === NUEVA COLUMNA DE COSTO === */}
                       <th className="px-4 py-3 font-semibold text-slate-600">Costo Acumulado</th>
-                      {/* ============================== */}
                       <th className="px-4 py-3 font-semibold text-slate-600 text-right">Acciones</th>
                     </tr>
                   </thead>
@@ -177,11 +179,7 @@ export default function AssetsPage() {
                         <td className="px-4 py-3 font-medium text-slate-800">{asset.asset_tag}</td>
                         <td className="px-4 py-3 text-slate-600">{asset.name}</td>
                         <td className="px-4 py-3 text-slate-500">{asset.location || '—'}</td>
-                        {/* === MOSTRAR EL COSTO ACUMULADO === */}
-                        <td className="px-4 py-3 font-bold text-red-600">
-                          ${Number(asset.costo_acumulado || 0).toLocaleString('es-CO')}
-                        </td>
-                        {/* ================================== */}
+                        <td className="px-4 py-3 font-bold text-red-600">${Number(asset.costo_acumulado || 0).toLocaleString('es-CO')}</td>
                         <td className="px-4 py-3 text-right whitespace-nowrap">
                           <button onClick={() => handleEdit(asset)} className="text-sky-600 hover:text-sky-800 font-medium mr-3">Editar</button>
                           <button onClick={() => handleDelete(asset.id)} className="text-red-500 hover:text-red-700 font-medium">Eliminar</button>
