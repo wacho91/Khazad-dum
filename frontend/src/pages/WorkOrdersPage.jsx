@@ -6,7 +6,7 @@ export default function WorkOrdersPage() {
   const navigate = useNavigate();
   const [workOrders, setWorkOrders] = useState([]);
   const [assets, setAssets] = useState([]);
-  const [parts, setParts] = useState([]); // Para el menú de repuestos al cerrar OT
+  const [parts, setParts] = useState([]);
   const [tenantId, setTenantId] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -44,7 +44,6 @@ export default function WorkOrdersPage() {
         if (assetsList.length > 0) setForm(prev => ({ ...prev, asset_id: assetsList[0].id }));
       }
 
-      // Traemos los repuestos para poder seleccionarlos al cerrar la OT
       const resParts = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
       if (resParts.ok) {
         const partsList = (await resParts.json()).items || [];
@@ -65,7 +64,7 @@ export default function WorkOrdersPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!tenantId) return alert('No se encontró la empresa.');
+    if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
     
     try {
       const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/work-orders`, {
@@ -93,7 +92,6 @@ export default function WorkOrdersPage() {
     }
   };
 
-  // === LA MAGIA: CERRAR OT Y CALCULAR COSTOS ===
   const handleCloseWO = async (wo) => {
     if (parts.length === 0) {
       return Swal.fire('Atención', 'No tienes repuestos en la bodega para asignar a la OT. Crea repuestos primero.', 'warning');
@@ -145,10 +143,76 @@ export default function WorkOrdersPage() {
           text: 'Los repuestos fueron descontados y el costo sumado a la máquina.',
           confirmButtonColor: '#4f46e5'
         });
-        fetchInitialData(); // Refrescamos la tabla
+        fetchInitialData();
       } catch (err) {
         Swal.fire('Error', err.message, 'error');
       }
+    }
+  };
+
+  // === LA MAGIA: VER EL RECIBO ===
+  const handleViewReceipt = async (wo) => {
+    try {
+      Swal.fire({ title: 'Cargando recibo...', didOpen: () => Swal.showLoading() });
+      
+      const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/work-orders/${wo.id}/cost-breakdown`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Error al obtener el recibo');
+
+      const itemsHtml = data.items.map(item => `
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 8px; text-align: left;">${item.name}</td>
+          <td style="padding: 8px; text-align: center;">${item.quantity}</td>
+          <td style="padding: 8px; text-align: right;">$${item.unit_price.toLocaleString('es-CO')}</td>
+          <td style="padding: 8px; text-align: right;">$${item.total.toLocaleString('es-CO')}</td>
+        </tr>
+      `).join('');
+
+      Swal.fire({
+        title: `🧾 Recibo de Mantenimiento`,
+        html: `
+          <div style="text-align: left; font-size: 14px; color: #334155;">
+            <p style="margin-bottom: 5px;"><b>OT:</b> ${data.description}</p>
+            <p style="margin-bottom: 15px;"><b>Fecha de Cierre:</b> ${new Date(data.closed_at).toLocaleDateString()}</p>
+            <div style="border-top: 1px solid #e2e8f0; margin-bottom: 15px;"></div>
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 12px;">
+                  <th style="padding: 8px; text-align: left;">Repuesto</th>
+                  <th style="padding: 8px; text-align: center;">Cant.</th>
+                  <th style="padding: 8px; text-align: right;">V. Unit.</th>
+                  <th style="padding: 8px; text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+            <div style="border-top: 2px solid #e2e8f0; margin-top: 15px; padding-top: 15px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span>Costo de Repuestos:</span>
+                <span style="font-weight: bold;">$${data.parts_cost.toLocaleString('es-CO')}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span>Mano de Obra:</span>
+                <span style="font-weight: bold;">$${data.labor_cost.toLocaleString('es-CO')}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; color: #4f46e5; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                <span>TOTAL OT:</span>
+                <span>$${data.total_cost.toLocaleString('es-CO')}</span>
+              </div>
+            </div>
+          </div>
+        `,
+        confirmButtonColor: '#4f46e5',
+        confirmButtonText: 'Cerrar',
+        width: '600px'
+      });
+
+    } catch (err) {
+      Swal.fire('Error', err.message, 'error');
     }
   };
 
@@ -268,7 +332,11 @@ export default function WorkOrdersPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right whitespace-nowrap">
-                            {wo.status !== 'completed' && (
+                            {wo.status === 'completed' ? (
+                              <button onClick={() => handleViewReceipt(wo)} className="bg-slate-100 text-slate-700 px-3 py-1 rounded-lg text-xs font-semibold hover:bg-slate-200">
+                                🧾 Ver Recibo
+                              </button>
+                            ) : (
                               <button onClick={() => handleCloseWO(wo)} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-xs font-semibold hover:bg-indigo-200">
                                 🔒 Cerrar OT
                               </button>
