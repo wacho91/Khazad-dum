@@ -175,3 +175,41 @@ async def close_work_order(
     await db.commit()
     await db.refresh(wo)
     return wo
+
+# === ENDPOINT: HISTORIAL DE COSTOS DE UNA MÁQUINA ===
+@router.get("/{wo_id}/cost-breakdown", response_model=dict)
+async def get_cost_breakdown(
+    tenant_id: uuid.UUID,
+    wo_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    wo = await db.get(WorkOrder, wo_id)
+    if not wo or wo.tenant_id != tenant_id:
+        raise HTTPException(status_code=404, detail="OT no encontrada")
+
+    # Buscamos los repuestos usados en esta OT
+    result = await db.execute(
+        select(StockMovement).where(StockMovement.work_order_id == wo_id)
+    )
+    movements = result.scalars().all()
+
+    items = []
+    for mov in movements:
+        part = await db.get(SparePart, mov.spare_part_id)
+        if part:
+            price = part.unit_cost if part.unit_cost and part.unit_cost > 0 else part.costo_promedio
+            items.append({
+                "name": part.name,
+                "quantity": float(mov.quantity),
+                "unit_price": float(price),
+                "total": float(mov.quantity * price)
+            })
+
+    return {
+        "description": wo.description,
+        "labor_cost": float(wo.labor_cost or 0),
+        "parts_cost": float(wo.parts_cost or 0),
+        "total_cost": float(wo.labor_cost or 0) + float(wo.parts_cost or 0),
+        "items": items,
+        "closed_at": wo.closed_at
+    }
