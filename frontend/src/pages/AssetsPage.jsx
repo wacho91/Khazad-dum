@@ -165,6 +165,9 @@ export default function AssetsPage() {
                       <th className="px-4 py-3 font-semibold text-slate-600">Código</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Nombre</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Ubicación</th>
+                      {/* === NUEVA COLUMNA DE COSTO === */}
+                      <th className="px-4 py-3 font-semibold text-slate-600">Costo Acumulado</th>
+                      {/* ============================== */}
                       <th className="px-4 py-3 font-semibold text-slate-600 text-right">Acciones</th>
                     </tr>
                   </thead>
@@ -174,6 +177,11 @@ export default function AssetsPage() {
                         <td className="px-4 py-3 font-medium text-slate-800">{asset.asset_tag}</td>
                         <td className="px-4 py-3 text-slate-600">{asset.name}</td>
                         <td className="px-4 py-3 text-slate-500">{asset.location || '—'}</td>
+                        {/* === MOSTRAR EL COSTO ACUMULADO === */}
+                        <td className="px-4 py-3 font-bold text-red-600">
+                          ${Number(asset.costo_acumulado || 0).toLocaleString('es-CO')}
+                        </td>
+                        {/* ================================== */}
                         <td className="px-4 py-3 text-right whitespace-nowrap">
                           <button onClick={() => handleEdit(asset)} className="text-sky-600 hover:text-sky-800 font-medium mr-3">Editar</button>
                           <button onClick={() => handleDelete(asset.id)} className="text-red-500 hover:text-red-700 font-medium">Eliminar</button>
