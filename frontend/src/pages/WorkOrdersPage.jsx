@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function WorkOrdersPage() {
   const navigate = useNavigate();
   const [workOrders, setWorkOrders] = useState([]);
   const [assets, setAssets] = useState([]);
+  const [parts, setParts] = useState([]); // Para el menú de repuestos al cerrar OT
   const [tenantId, setTenantId] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Por defecto, la OT es Correctiva y de Prioridad Media
   const [form, setForm] = useState({ 
     asset_id: '', 
     description: 'Mantenimiento general', 
@@ -19,10 +20,7 @@ export default function WorkOrdersPage() {
   const token = localStorage.getItem('manttoflow_token');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) { navigate('/login'); return; }
     fetchInitialData();
   }, []);
 
@@ -30,7 +28,6 @@ export default function WorkOrdersPage() {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       
-      // 1. Buscamos el Tenant
       const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', { headers });
       const tenantsData = await resTenants.json();
       const tenants = tenantsData.items || tenantsData;
@@ -40,16 +37,20 @@ export default function WorkOrdersPage() {
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
 
-      // 2. Traemos los Activos (Máquinas) para el menú desplegable
       const resAssets = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/assets`, { headers });
       if (resAssets.ok) {
-        const assetsData = await resAssets.json();
-        const assetsList = assetsData.items || assetsData;
+        const assetsList = (await resAssets.json()).items || [];
         setAssets(assetsList);
         if (assetsList.length > 0) setForm(prev => ({ ...prev, asset_id: assetsList[0].id }));
       }
 
-      // 3. Traemos las Órdenes de Trabajo existentes
+      // Traemos los repuestos para poder seleccionarlos al cerrar la OT
+      const resParts = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
+      if (resParts.ok) {
+        const partsList = (await resParts.json()).items || [];
+        setParts(partsList);
+      }
+
       const resWO = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/work-orders`, { headers });
       if (resWO.ok) {
         const woData = await resWO.json();
@@ -84,30 +85,89 @@ export default function WorkOrdersPage() {
         throw new Error(errorMsg);
       }
       
+      Swal.fire({ icon: 'success', title: '¡OT Creada!', timer: 1500, showConfirmButton: false });
       setForm(prev => ({ ...prev, description: 'Mantenimiento general' }));
       fetchInitialData(); 
     } catch (err) {
-      alert(err.message);
+      Swal.fire('Error', err.message, 'error');
     }
   };
 
-  // Colores para los estados y prioridades
+  // === LA MAGIA: CERRAR OT Y CALCULAR COSTOS ===
+  const handleCloseWO = async (wo) => {
+    if (parts.length === 0) {
+      return Swal.fire('Atención', 'No tienes repuestos en la bodega para asignar a la OT. Crea repuestos primero.', 'warning');
+    }
+
+    const { value: formValues } = await Swal.fire({
+      title: `Cerrar OT: ${wo.description.substring(0, 20)}...`,
+      html: `
+        <p class="text-sm text-slate-500 mb-4">Registra los repuestos usados y el costo de mano de obra.</p>
+        <select id="swal-part" class="swal2-select">
+          ${parts.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock_actual})</option>`).join('')}
+        </select>
+        <input type="number" id="swal-qty" class="swal2-input" placeholder="Cantidad usada" step="0.1" min="0.1">
+        <input type="number" id="swal-labor" class="swal2-input" placeholder="Costo de Mano de Obra (ej. 50000)" step="0.01" min="0">
+      `,
+      confirmButtonText: 'Cerrar y Calcular Costos',
+      confirmButtonColor: '#4f46e5',
+      focusConfirm: false,
+      preConfirm: () => {
+        const partId = document.getElementById('swal-part').value;
+        const qty = document.getElementById('swal-qty').value;
+        const labor = document.getElementById('swal-labor').value;
+
+        if (!qty || parseFloat(qty) <= 0) {
+          Swal.showValidationMessage('La cantidad usada debe ser mayor a 0');
+        }
+        
+        return {
+          used_parts: [{ spare_part_id: partId, quantity: parseFloat(qty) }],
+          labor_cost: labor ? parseFloat(labor) : 0
+        };
+      }
+    });
+
+    if (formValues) {
+      try {
+        const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/work-orders/${wo.id}/close`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(formValues)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Error al cerrar la OT');
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡OT Cerrada!',
+          text: 'Los repuestos fueron descontados y el costo sumado a la máquina.',
+          confirmButtonColor: '#4f46e5'
+        });
+        fetchInitialData(); // Refrescamos la tabla
+      } catch (err) {
+        Swal.fire('Error', err.message, 'error');
+      }
+    }
+  };
+
   const statusColor = (status) => {
     if (status === 'completed') return 'bg-green-100 text-green-700';
     if (status === 'in_progress') return 'bg-sky-100 text-sky-700';
-    return 'bg-amber-100 text-amber-700'; // open
+    return 'bg-amber-100 text-amber-700';
   };
 
   const priorityColor = (priority) => {
     if (priority === 'urgent') return 'bg-red-100 text-red-700';
     if (priority === 'high') return 'bg-orange-100 text-orange-700';
-    return 'bg-slate-100 text-slate-600'; // medium/low
+    return 'bg-slate-100 text-slate-600';
   };
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Órdenes de Trajo 📋</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">Órdenes de Trabajo 📋</h1>
         <p className="text-slate-500">Gestiona los mantenimientos preventivos y correctivos.</p>
       </div>
 
@@ -181,11 +241,11 @@ export default function WorkOrdersPage() {
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-4 py-3 font-semibold text-slate-600">ID / Fecha</th>
+                      <th className="px-4 py-3 font-semibold text-slate-600">Fecha</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Máquina</th>
-                      <th className="px-4 py-3 font-semibold text-slate-600">Descripción</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Prioridad</th>
                       <th className="px-4 py-3 font-semibold text-slate-600">Estado</th>
+                      <th className="px-4 py-3 font-semibold text-slate-600 text-right">Acción</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -194,11 +254,9 @@ export default function WorkOrdersPage() {
                       return (
                         <tr key={wo.id} className="hover:bg-slate-50">
                           <td className="px-4 py-3 text-slate-500 text-xs">
-                            {wo.id.substring(0,8)}<br/>
                             {new Date(wo.created_at).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-3 font-medium text-slate-800">{asset?.name || 'N/A'}</td>
-                          <td className="px-4 py-3 text-slate-600 max-w-xs truncate">{wo.description}</td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${priorityColor(wo.priority)}`}>
                               {wo.priority}
@@ -206,8 +264,15 @@ export default function WorkOrdersPage() {
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusColor(wo.status)}`}>
-                              {wo.status.replace('_', ' ')}
+                              {wo.status === 'completed' ? 'Completada' : wo.status}
                             </span>
+                          </td>
+                          <td className="px-4 py-3 text-right whitespace-nowrap">
+                            {wo.status !== 'completed' && (
+                              <button onClick={() => handleCloseWO(wo)} className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg text-xs font-semibold hover:bg-indigo-200">
+                                🔒 Cerrar OT
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );
