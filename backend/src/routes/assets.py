@@ -6,6 +6,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -95,7 +96,7 @@ async def update_asset(
     return asset
 
 
-@router.delete("/{asset_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{asset_id}", status_code=204)
 async def delete_asset(
     tenant_id: uuid.UUID, asset_id: uuid.UUID, db: AsyncSession = Depends(get_db)
 ) -> None:
@@ -104,8 +105,15 @@ async def delete_asset(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="asset not found"
         )
+    
+    # === MAGIA: Borramos el historial y OTs asociadas para que deje borrar la máquina ===
+    await db.execute(text("DELETE FROM work_orders WHERE asset_id = :asset_id"), {"asset_id": asset_id})
+    await db.execute(text("DELETE FROM asset_status_history WHERE asset_id = :asset_id"), {"asset_id": asset_id})
+    # =====================================================================================
+    
     await db.delete(asset)
     await db.commit()
+    return None
 
 
 @router.post(
