@@ -246,7 +246,7 @@ export default function WorkOrdersPage() {
                 <select 
                   value={form.asset_id}
                   onChange={(e) => setForm({...form, asset_id: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
                   required
                 >
                   {assets.map(a => <option key={a.id} value={a.id}>{a.name} ({a.asset_tag})</option>)}
@@ -258,7 +258,7 @@ export default function WorkOrdersPage() {
                   required
                   value={form.description}
                   onChange={(e) => setForm({...form, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-slate-800 bg-white"
                   rows="3"
                   placeholder="Cambiar rodamientos de la banda..."
                 />
@@ -269,10 +269,20 @@ export default function WorkOrdersPage() {
                   <select 
                     value={form.type}
                     onChange={(e) => setForm({...form, type: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate"
                   >
-                    <option value="corrective">Correctivo</option>
-                    <option value="preventive">Preventivo</option>
+                    <option 
+                      value="corrective"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
+                      >
+                        Correctivo
+                      </option>
+                    <option 
+                      value="preventive"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
+                    >
+                      Preventivo
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -280,9 +290,9 @@ export default function WorkOrdersPage() {
                   <select 
                     value={form.priority}
                     onChange={(e) => setForm({...form, priority: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
                   >
-                    <option value="low">Baja</option>
+                    <option  value="low">Baja</option>
                     <option value="medium">Media</option>
                     <option value="high">Alta</option>
                     <option value="urgent">Urgente</option>
