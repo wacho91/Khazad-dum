@@ -163,6 +163,11 @@ async def close_work_order(
     # 5. Actualizamos la Máquina (Le sumamos el costo total a su TCO)
     asset.costo_acumulado = (asset.costo_acumulado or Decimal("0")) + total_cost
 
+    # === MAGIA: Guardamos el recibo en la OT ===
+    wo.labor_cost = payload.labor_cost
+    wo.parts_cost = total_cost - payload.labor_cost
+    # ===========================================
+
     # 6. Cerramos la OT
     wo.status = "completed"
     wo.closed_at = datetime.now()
