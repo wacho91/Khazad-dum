@@ -104,6 +104,39 @@ async def close_work_order(
         if part.stock_actual < part_data.quantity:
             raise HTTPException(status_code=400, detail=f"Stock insuficiente para {part.name}. Solo hay {part.stock_actual}")
         
+        # Descontamos de la bodega (Forzamos Decimal)
+        part.stock_actual = Decimal(str(part.stock_actual)) - Decimal(str(part_data.quantity))
+        
+        # Calculamos el costo de este repuesto (Forzamos todo a Decimal para evitar None)
+        u_cost = Decimal(str(part.unit_cost)) if part.unit_cost is not None else Decimal("0")
+        p_cost = Decimal(str(part.costo_promedio)) if part.costo_promedio is not None else Decimal("0")
+        
+        # Magia: Si tiene unit_cost lo usa, si no, usa costo_promedio
+        part_price = u_cost if u_cost > 0 else p_cost
+        part_cost = Decimal(str(part_data.quantity)) * part_price
+        
+        # === DEBUG: Esto se imprimirá en tu terminal de backend ===
+        print(f"DEBUG CLOSE OT: Repuesto={part.name}, Cantidad={part_data.quantity}, Precio={part_price}, Costo={part_cost}")
+        # =========================================================
+        
+        total_cost += part_cost
+
+        # Registramos el movimiento en el Kardex (Historial)
+        movement = StockMovement(
+            tenant_id=tenant_id,
+            spare_part_id=part.id,
+            work_order_id=wo.id,
+            movement_type="out", # Salida
+            quantity=part_data.quantity
+        )
+        db.add(movement)
+        part = await db.get(SparePart, part_data.spare_part_id)
+        if not part:
+            raise HTTPException(status_code=404, detail=f"Repuesto {part_data.spare_part_id} no encontrado")
+        
+        if part.stock_actual < part_data.quantity:
+            raise HTTPException(status_code=400, detail=f"Stock insuficiente para {part.name}. Solo hay {part.stock_actual}")
+        
         # Descontamos de la bodega
         part.stock_actual -= part_data.quantity
         
