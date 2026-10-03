@@ -107,9 +107,12 @@ async def close_work_order(
         # Descontamos de la bodega
         part.stock_actual -= part_data.quantity
         
-        # Calculamos el costo de este repuesto
-        part_cost = part_data.quantity * (part.unit_cost or Decimal("0"))
+        # === MAGIA FINANCIERA CORREGIDA ===
+        # Si tiene unit_cost lo usa, si no, usa costo_promedio
+        part_price = part.unit_cost if part.unit_cost and part.unit_cost > 0 else part.costo_promedio
+        part_cost = part_data.quantity * part_price
         total_cost += part_cost
+        # ==================================
 
         # Registramos el movimiento en el Kardex (Historial)
         movement = StockMovement(
