@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import LoadingState from '../components/ui/LoadingState';
 
 export default function SparePartsPage() {
   const navigate = useNavigate();
@@ -12,17 +14,13 @@ export default function SparePartsPage() {
   const token = localStorage.getItem('manttoflow_token');
 
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) { navigate('/login'); return; }
     fetchInitialData();
   }, []);
 
   const fetchInitialData = async () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      // 1. Buscamos el ID de la empresa (Tenant)
       const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', { headers });
       if (!resTenants.ok) throw new Error('Error al obtener empresa');
       
@@ -34,7 +32,6 @@ export default function SparePartsPage() {
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
 
-      // 2. Traemos los repuestos de esa empresa
       const resParts = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
       if (resParts.ok) {
         const partsData = await resParts.json();
@@ -49,7 +46,7 @@ export default function SparePartsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!tenantId) return alert('No se encontró la empresa.');
+    if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
     
     const method = editingId ? 'PATCH' : 'POST';
     const url = editingId 
@@ -79,11 +76,12 @@ export default function SparePartsPage() {
         throw new Error(errorMsg);
       }
       
+      Swal.fire({ icon: 'success', title: editingId ? '¡Actualizado!' : '¡Creado!', timer: 1500, showConfirmButton: false });
       setForm({ sku: '', name: '', stock_actual: 0, stock_minimo: 0, costo_promedio: 0 });
       setEditingId(null);
       fetchInitialData(); 
     } catch (err) {
-      alert(err.message);
+      Swal.fire('Error', err.message, 'error');
     }
   };
 
@@ -103,17 +101,25 @@ export default function SparePartsPage() {
     setEditingId(null);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Seguro que quieres eliminar este repuesto?")) return;
-    try {
-      await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/spare-parts/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      fetchInitialData();
-    } catch (err) {
-      alert("Error al eliminar");
-    }
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "¡No podrás revertir esta acción! El repuesto se eliminará permanentemente.",
+      icon: 'warning', showCancelButton: true,
+      confirmButtonColor: '#d33', cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/spare-parts/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          Swal.fire('¡Eliminado!', 'El repuesto ha sido eliminado.', 'success');
+          fetchInitialData();
+        } catch (err) { Swal.fire('Error', 'No se pudo eliminar.', 'error'); }
+      }
+    });
   };
 
   const formatCurrency = (value) => `$${Number(value).toLocaleString('es-CO')}`;
@@ -133,25 +139,25 @@ export default function SparePartsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">SKU / Código</label>
-                <input type="text" required value={form.sku} onChange={(e) => setForm({...form, sku: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="ROD-6204" />
+                <input type="text" required value={form.sku} onChange={(e) => setForm({...form, sku: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="ROD-6204" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Nombre</label>
-                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Rodamiento 6204" />
+                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="Rodamiento 6204" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-1">Stock Actual</label>
-                  <input type="number" required value={form.stock_actual} onChange={(e) => setForm({...form, stock_actual: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500" />
+                  <input type="number" required value={form.stock_actual} onChange={(e) => setForm({...form, stock_actual: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-1">Stock Mínimo</label>
-                  <input type="number" required value={form.stock_minimo} onChange={(e) => setForm({...form, stock_minimo: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500" />
+                  <input type="number" required value={form.stock_minimo} onChange={(e) => setForm({...form, stock_minimo: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Costo Unitario</label>
-                <input type="number" step="0.01" required value={form.costo_promedio} onChange={(e) => setForm({...form, costo_promedio: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500" />
+                <input type="number" step="0.01" required value={form.costo_promedio} onChange={(e) => setForm({...form, costo_promedio: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
               </div>
               <div className="flex gap-2">
                 <button type="submit" className="w-full bg-amber-600 text-white py-2 rounded-lg font-semibold hover:bg-amber-700">
@@ -167,7 +173,7 @@ export default function SparePartsPage() {
         <div className="md:col-span-2">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Inventario de Bodega</h2>
-            {loading ? <p className="text-slate-400">Cargando...</p> : parts.length === 0 ? <p className="text-slate-400 italic">No hay repuestos registrados.</p> : (
+            {loading ? <LoadingState /> : parts.length === 0 ? <p className="text-slate-400 italic">No hay repuestos registrados.</p> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
