@@ -31,8 +31,8 @@ export default function DashboardPage() {
         ]);
 
         const assetsData = resAssets.ok ? (await resAssets.json()).items || [] : [];
-        const wosData = resWOs.ok ? (await resWOs.json()).items || [] : [];
-        const partsData = resParts.ok ? (await resParts.json()).items || [] : [];
+        const woRaw = resWOs.ok ? await resWOs.json() : [];
+        const wosData = woRaw.items ? woRaw.items : (Array.isArray(woRaw) ? woRaw : []);
 
         // 1. KPIs Básicos
         const openWOs = wosData.filter(wo => wo.status !== 'completed').length;
