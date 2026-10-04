@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import LoadingState from '../components/ui/LoadingState';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({ assets: 0, openWOs: 0, lowStock: 0 });
@@ -56,7 +57,7 @@ export default function DashboardPage() {
 
   const formatCurrency = (value) => `$${Number(value || 0).toLocaleString('es-CO')}`;
 
-  if (loading) return <p className="text-slate-400">Cargando dashboard...</p>;
+  if (loading) return <LoadingState />;
 
   return (
     <div>
