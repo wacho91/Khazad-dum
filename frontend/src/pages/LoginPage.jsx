@@ -50,7 +50,7 @@ export default function LoginPage() {
       
       {/* Marca de agua gigante con el nombre de la empresa */}
       <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <h1 className="text-[18vw] font-extrabold text-white/5 tracking-tighter select-none">
+        <h1 className="text-[16vw] font-extrabold text-white/5 tracking-tighter select-none">
           Khazad-Dum
         </h1>
       </div>
