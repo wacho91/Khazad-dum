@@ -1,5 +1,5 @@
-export default function Logo({ className = "", variant = "dark" }) {
-  // Si el fondo es oscuro (menú/login), usamos letras claras. Si es claro (carga), letras oscuras.
+export default function Logo({ className = "", variant = "light" }) {
+  // Por defecto usamos "light" (letras claras) para que se vea en el menú oscuro
   const mainColor = variant === "light" ? "text-slate-100" : "text-slate-800";
   const subColor = variant === "light" ? "text-sky-400" : "text-sky-600";
 
