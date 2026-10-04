@@ -154,3 +154,14 @@ websockets==16.0
 yarl==1.24.2
 youtube-transcript-api==1.2.4
 zipp==4.1.0
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+asyncpg
+pydantic
+pydantic-settings
+python-jose[cryptography]
+bcrypt
+python-multipart
+python-dotenv
+httpx
