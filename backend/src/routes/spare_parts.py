@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -97,17 +97,19 @@ async def update_spare_part(
     return part
 
 
-@router.delete("/{part_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{part_id}")
 async def delete_spare_part(
     tenant_id: uuid.UUID, part_id: uuid.UUID, db: AsyncSession = Depends(get_db)
-) -> None:
+):
     part = await db.get(SparePart, part_id)
     if part is None or part.tenant_id != tenant_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="spare part not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="spare part not found")
+    
     await db.delete(part)
     await db.commit()
+    
+    # Devolvemos la respuesta 204 explícitamente
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post(
