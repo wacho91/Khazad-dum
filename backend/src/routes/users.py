@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -92,7 +92,7 @@ async def update_user(
     return user
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}")
 async def delete_user(
     tenant_id: uuid.UUID, user_id: uuid.UUID, db: AsyncSession = Depends(get_db)
 ) -> None:
@@ -103,3 +103,4 @@ async def delete_user(
         )
     await db.delete(user)
     await db.commit()
+    Response(status_code=status.HTTP_204_NO_CONTENT)

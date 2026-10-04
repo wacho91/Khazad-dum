@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -91,7 +91,7 @@ async def update_location(
     return location
 
 
-@router.delete("/{location_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{location_id}")
 async def delete_location(
     tenant_id: uuid.UUID,
     location_id: uuid.UUID,
@@ -104,3 +104,5 @@ async def delete_location(
         )
     await db.delete(location)
     await db.commit()
+    # Devolvemos la respuesta 204 explícitamente
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

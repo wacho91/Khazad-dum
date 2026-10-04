@@ -70,7 +70,7 @@ async def update_tenant(
     return tenant
 
 
-@router.delete("/{tenant_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{tenant_id}")
 async def delete_tenant(
     tenant_id: uuid.UUID, db: AsyncSession = Depends(get_db)
 ) -> None:
