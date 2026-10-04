@@ -51,14 +51,14 @@ export default function LoginPage() {
       {/* Marca de agua gigante con el nombre de la empresa */}
       <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
         <h1 className="text-[18vw] font-extrabold text-white/5 tracking-tighter select-none">
-          ManttoFlow
+          Khazad-Dum
         </h1>
       </div>
 
       {/* Tarjeta de Login translúcida (Glassmorphism) */}
       <div className="relative z-10 max-w-md w-full bg-white/10 dark:bg-gray-800/30 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/20">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-white drop-shadow-lg">ManttoFlow</h1>
+          <h1 className="text-4xl font-extrabold text-white drop-shadow-lg">Khazad-Dum</h1>
           <p className="text-sky-300 mt-2 text-sm font-medium tracking-wide">FACILITY MANAGEMENT SYSTEM</p>
         </div>
         
@@ -71,7 +71,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-300 focus:ring-2 focus:ring-sky-400 focus:border-transparent focus:outline-none backdrop-blur-sm"
-              placeholder="admin@manttoflow.com"
+              placeholder="admin@khazad-dum.com"
             />
           </div>
           
