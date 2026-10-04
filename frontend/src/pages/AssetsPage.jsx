@@ -4,6 +4,7 @@ import { usePagination } from '../hooks/usePagination';
 
 import Pagination from '../components/ui/Pagination';
 import Swal from 'sweetalert2';
+import LoadingState from '../components/ui/LoadingState';
 
 export default function AssetsPage() {
   const navigate = useNavigate();
@@ -166,7 +167,7 @@ export default function AssetsPage() {
         <div className="md:col-span-2">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Máquinas Registradas</h2>
-            {loading ? <p className="text-slate-400">Cargando...</p> : assets.length === 0 ? <p className="text-slate-400 italic">No hay activos registrados.</p> : (
+            {loading ? <LoadingState /> : assets.length === 0 ? <p className="text-slate-400 italic">No hay activos registrados.</p> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
