@@ -1,7 +1,11 @@
-export default function Logo({ className = "" }) {
+export default function Logo({ className = "", variant = "dark" }) {
+  // Si el fondo es oscuro (menú/login), usamos letras claras. Si es claro (carga), letras oscuras.
+  const mainColor = variant === "light" ? "text-slate-100" : "text-slate-800";
+  const subColor = variant === "light" ? "text-sky-400" : "text-sky-600";
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* Icono: Engranaje hexagonal (Representa industria y mantenimiento) */}
+      {/* Icono: Engranaje hexagonal */}
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M16 2L29 9.5V22.5L16 30L3 22.5V9.5L16 2Z" fill="url(#paint0_linear_kd)" />
         <path d="M16 8L22 11.5V18.5L16 22L10 18.5V11.5L16 8Z" fill="#0f172a" />
@@ -14,8 +18,8 @@ export default function Logo({ className = "" }) {
         </defs>
       </svg>
       <div className="flex flex-col leading-none">
-        <span className="font-extrabold text-xl text-slate-100 tracking-tight">Khazad-dum</span>
-        <span className="text-[10px] font-medium text-sky-400 tracking-widest uppercase">Facility Mgmt</span>
+        <span className={`font-extrabold text-xl ${mainColor} tracking-tight`}>Khazad-dum</span>
+        <span className={`text-[10px] font-medium ${subColor} tracking-widest uppercase`}>Facility Mgmt</span>
       </div>
     </div>
   );
