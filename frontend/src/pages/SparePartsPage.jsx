@@ -105,34 +105,31 @@ export default function SparePartsPage() {
         <div className="md:col-span-1">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">{editingId ? 'Editar Repuesto' : 'Nuevo Repuesto'}</h2>
-            <form 
-              className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4"
-              onSubmit={handleSubmit}
-            >
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">SKU / Código</label>
-                <input type="text" required value={form.sku} onChange={(e) => setForm({...form, sku: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="ROD-6204" />
+                <label className="block text-sm font-medium text-slate-600 mb-1">SKU / Código</label>
+                <input type="text" required value={form.sku} onChange={(e) => setForm({...form, sku: e.target.value})} className="w-full px-3 py-2 border bg-white border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="ROD-6204" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Nombre</label>
-                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="Rodamiento 6204" />
+                <label className="block text-sm font-medium text-slate-600 mb-1">Nombre</label>
+                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border bg-white border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" placeholder="Rodamiento 6204" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-800 mb-1">Stock Actual</label>
-                  <input type="number" required value={form.stock_actual} onChange={(e) => setForm({...form, stock_actual: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Stock Actual</label>
+                  <input type="number" required value={form.stock_actual} onChange={(e) => setForm({...form, stock_actual: e.target.value})} className="w-full bg-white px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-800 mb-1">Stock Mínimo</label>
-                  <input type="number" required value={form.stock_minimo} onChange={(e) => setForm({...form, stock_minimo: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Stock Mínimo</label>
+                  <input type="number" required value={form.stock_minimo} onChange={(e) => setForm({...form, stock_minimo: e.target.value})} className="w-full bg-white px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-800 mb-1">Costo Unitario</label>
-                <input type="number" step="0.01" required value={form.costo_promedio} onChange={(e) => setForm({...form, costo_promedio: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
+                <label className="block text-sm font-medium text-slate-600 mb-1">Costo Unitario</label>
+                <input type="number" step="0.01" required value={form.costo_promedio} onChange={(e) => setForm({...form, costo_promedio: e.target.value})} className="w-full bg-white px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-slate-800" />
               </div>
               <div className="flex gap-2">
-                <button type="submit" className="w-full bg-amber-800 text-white py-2 rounded-lg font-semibold hover:bg-amber-700">
+                <button type="submit" className="w-full bg-amber-600 text-white py-2 rounded-lg font-semibold hover:bg-amber-700">
                   {editingId ? '✓ Actualizar' : '+ Crear Repuesto'}
                 </button>
                 {editingId && <button type="button" onClick={handleCancelEdit} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-300">✕</button>}
