@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import LoadingState from '../components/ui/LoadingState';
 
 export default function WorkOrdersPage() {
   const navigate = useNavigate();
@@ -269,20 +270,10 @@ export default function WorkOrdersPage() {
                   <select 
                     value={form.type}
                     onChange={(e) => setForm({...form, type: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-transparent text-slate-800"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
                   >
-                    <option 
-                      value="corrective"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-transparent text-slate-800"
-                      >
-                        Correctivo
-                      </option>
-                    <option 
-                      value="preventive"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
-                    >
-                      Preventivo
-                    </option>
+                    <option value="corrective">Correctivo</option>
+                    <option value="preventive">Preventivo</option>
                   </select>
                 </div>
                 <div>
@@ -290,9 +281,9 @@ export default function WorkOrdersPage() {
                   <select 
                     value={form.priority}
                     onChange={(e) => setForm({...form, priority: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-transparent text-slate-800"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
                   >
-                    <option  value="low">Baja</option>
+                    <option value="low">Baja</option>
                     <option value="medium">Media</option>
                     <option value="high">Alta</option>
                     <option value="urgent">Urgente</option>
@@ -310,7 +301,7 @@ export default function WorkOrdersPage() {
         <div className="md:col-span-2">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Órdenes Activas e Historial</h2>
-            {loading ? <p className="text-slate-400">Cargando...</p> : workOrders.length === 0 ? <p className="text-slate-400 italic">No hay órdenes de trabajo registradas.</p> : (
+            {loading ? <LoadingState /> : workOrders.length === 0 ? <p className="text-slate-400 italic">No hay órdenes de trabajo registradas.</p> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
