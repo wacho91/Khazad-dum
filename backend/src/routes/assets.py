@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Response
 from sqlalchemy import func, select
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -96,7 +96,7 @@ async def update_asset(
     return asset
 
 
-@router.delete("/{asset_id}", status_code=204)
+@router.delete("/{asset_id}")
 async def delete_asset(
     tenant_id: uuid.UUID, asset_id: uuid.UUID, db: AsyncSession = Depends(get_db)
 ) -> None:
@@ -120,7 +120,8 @@ async def delete_asset(
     
     await db.delete(asset)
     await db.commit()
-    return None
+    # Devolvemos la respuesta 204 explícitamente
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post(
