@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -81,3 +81,5 @@ async def delete_tenant(
         )
     await db.delete(tenant)
     await db.commit()
+    # Devolvemos la respuesta 204 explícitamente
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
