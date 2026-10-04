@@ -111,15 +111,15 @@ export default function AssetsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Nombre</label>
-                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Banda Transportadora 1" />
+                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className=" bg-white w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Banda Transportadora 1" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Tag / Código</label>
-                <input type="text" required value={form.asset_tag} onChange={(e) => setForm({...form, asset_tag: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="BANDA-001" />
+                <input type="text" required value={form.asset_tag} onChange={(e) => setForm({...form, asset_tag: e.target.value})} className="bg-white w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="BANDA-001" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Ubicación</label>
-                <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Línea de Producción 1" />
+                <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className=" bg-white w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Línea de Producción 1" />
               </div>
               <div className="flex gap-2">
                 <button type="submit" disabled={saving} className="w-full bg-sky-600 text-white py-2 rounded-lg font-semibold hover:bg-sky-700 disabled:opacity-50">
