@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePagination } from '../hooks/usePagination';
-
-import Pagination from '../components/ui/Pagination';
 import Swal from 'sweetalert2';
 import LoadingState from '../components/ui/LoadingState';
 
@@ -16,8 +13,6 @@ export default function AssetsPage() {
   const [form, setForm] = useState({ name: '', asset_tag: '', location: '' });
 
   const token = localStorage.getItem('manttoflow_token');
-
-    const { currentItems, currentPage, totalPages, goToPage } = usePagination(assets, 8);
 
   useEffect(() => {
     if (!token) { navigate('/login'); return; }
@@ -52,6 +47,13 @@ export default function AssetsPage() {
       setLoading(false);
     }
   };
+
+  // === LÓGICA UNIFICADA: Si está cargando, toma toda la página ===
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <LoadingState />
+    </div>
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -115,14 +117,20 @@ export default function AssetsPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets/${id}`, {
+          const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
           });
+          
+          if (!res.ok && res.status !== 204) {
+            const errData = await res.json();
+            throw new Error(errData.detail || 'El backend rechazó la eliminación.');
+          }
+          
           Swal.fire('¡Eliminado!', 'El activo ha sido eliminado.', 'success');
           fetchInitialData();
         } catch (err) {
-          Swal.fire('Error', 'No se pudo eliminar.', 'error');
+          Swal.fire('Error', err.message, 'error');
         }
       }
     });
@@ -143,15 +151,15 @@ export default function AssetsPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Nombre</label>
-                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="Banda Transportadora 1" />
+                <input type="text" required value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Banda Transportadora 1" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Tag / Código</label>
-                <input type="text" required value={form.asset_tag} onChange={(e) => setForm({...form, asset_tag: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="BANDA-001" />
+                <input type="text" required value={form.asset_tag} onChange={(e) => setForm({...form, asset_tag: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="BANDA-001" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Ubicación</label>
-                <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500" placeholder="Línea de Producción 1" />
+                <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 text-slate-800" placeholder="Línea de Producción 1" />
               </div>
               <div className="flex gap-2">
                 <button type="submit" disabled={saving} className="w-full bg-sky-600 text-white py-2 rounded-lg font-semibold hover:bg-sky-700 disabled:opacity-50">
@@ -167,7 +175,7 @@ export default function AssetsPage() {
         <div className="md:col-span-2">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Máquinas Registradas</h2>
-            {loading ? <LoadingState /> : assets.length === 0 ? <p className="text-slate-400 italic">No hay activos registrados.</p> : (
+            {assets.length === 0 ? <p className="text-slate-400 italic">No hay activos registrados.</p> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
@@ -180,7 +188,7 @@ export default function AssetsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {currentItems.map((asset) => (
+                    {assets.map((asset) => (
                       <tr key={asset.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 font-medium text-slate-800">{asset.asset_tag}</td>
                         <td className="px-4 py-3 text-slate-600">{asset.name}</td>
@@ -194,11 +202,6 @@ export default function AssetsPage() {
                     ))}
                   </tbody>
                 </table>
-              <Pagination 
-                currentPage={currentPage} 
-                totalPages={totalPages} 
-                onPageChange={goToPage} 
-              />
               </div>
             )}
           </div>
