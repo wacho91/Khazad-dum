@@ -27,7 +27,7 @@ export default function SparePartsPage() {
   const fetchInitialData = async () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', { headers });
+      const resTenants = await fetch(' https://khazad-dum.onrender.com/api/v1/tenants/', { headers });
       if (!resTenants.ok) throw new Error('Error al obtener empresa');
       const tenantsData = await resTenants.json();
       const tenants = tenantsData.items || tenantsData; 
@@ -36,7 +36,7 @@ export default function SparePartsPage() {
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
 
-      const resParts = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
+      const resParts = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
       if (resParts.ok) {
         const partsData = await resParts.json();
         setParts(partsData.items || partsData);
@@ -53,7 +53,7 @@ export default function SparePartsPage() {
     e.preventDefault();
     if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
     const method = editingId ? 'PATCH' : 'POST';
-    const url = editingId ? `http://localhost:8000/api/v1/tenants/${tenantId}/spare-parts/${editingId}` : `http://localhost:8000/api/v1/tenants/${tenantId}/spare-parts`;
+    const url = editingId ? ` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/spare-parts/${editingId}` : ` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/spare-parts`;
     try {
       const res = await fetch(url, {
         method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -85,7 +85,7 @@ export default function SparePartsPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/spare-parts/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+          await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/spare-parts/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
           Swal.fire('¡Eliminado!', 'El repuesto ha sido eliminado.', 'success');
           fetchInitialData();
         } catch (err) { Swal.fire('Error', 'No se pudo eliminar.', 'error'); }

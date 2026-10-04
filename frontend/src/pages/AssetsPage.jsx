@@ -27,7 +27,7 @@ export default function AssetsPage() {
 
   const fetchInitialData = async () => {
     try {
-      const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', {
+      const resTenants = await fetch(' https://khazad-dum.onrender.com/api/v1/tenants/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!resTenants.ok) throw new Error('Error al obtener empresa');
@@ -38,7 +38,7 @@ export default function AssetsPage() {
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
 
-      const resAssets = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/assets`, {
+      const resAssets = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${currentTenantId}/assets`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (resAssets.ok) {
@@ -58,7 +58,7 @@ export default function AssetsPage() {
     if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
     setSaving(true);
     const method = editingId ? 'PATCH' : 'POST';
-    const url = editingId ? `http://localhost:8000/api/v1/tenants/${tenantId}/assets/${editingId}` : `http://localhost:8000/api/v1/tenants/${tenantId}/assets`;
+    const url = editingId ? ` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/assets/${editingId}` : ` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/assets`;
     try {
       const res = await fetch(url, {
         method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(form)
@@ -90,7 +90,7 @@ export default function AssetsPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/assets/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+          await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/assets/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
           Swal.fire('¡Eliminado!', 'El activo ha sido eliminado.', 'success');
           fetchInitialData();
         } catch (err) { Swal.fire('Error', 'No se pudo eliminar.', 'error'); }

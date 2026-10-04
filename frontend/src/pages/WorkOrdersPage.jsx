@@ -29,7 +29,7 @@ export default function WorkOrdersPage() {
   const fetchInitialData = async () => {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
-      const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', { headers });
+      const resTenants = await fetch(' https://khazad-dum.onrender.com/api/v1/tenants/', { headers });
       const tenantsData = await resTenants.json();
       const tenants = tenantsData.items || tenantsData;
       if (tenants.length === 0) { setLoading(false); return; }
@@ -37,20 +37,20 @@ export default function WorkOrdersPage() {
       const currentTenantId = tenants[0].id;
       setTenantId(currentTenantId);
 
-      const resAssets = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/assets`, { headers });
+      const resAssets = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${currentTenantId}/assets`, { headers });
       if (resAssets.ok) {
         const assetsList = (await resAssets.json()).items || [];
         setAssets(assetsList);
         if (assetsList.length > 0) setForm(prev => ({ ...prev, asset_id: assetsList[0].id }));
       }
 
-      const resParts = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
+      const resParts = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${currentTenantId}/spare-parts`, { headers });
       if (resParts.ok) {
         const partsList = (await resParts.json()).items || [];
         setParts(partsList);
       }
 
-      const resWO = await fetch(`http://localhost:8000/api/v1/tenants/${currentTenantId}/work-orders`, { headers });
+      const resWO = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${currentTenantId}/work-orders`, { headers });
       if (resWO.ok) {
         const woData = await resWO.json();
         setWorkOrders(Array.isArray(woData) ? woData : (woData.items || []));
@@ -67,7 +67,7 @@ export default function WorkOrdersPage() {
     e.preventDefault();
     if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/work-orders`, {
+      const res = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/work-orders`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(form)
       });
       if (!res.ok) {
@@ -104,7 +104,7 @@ export default function WorkOrdersPage() {
 
     if (formValues) {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/work-orders/${wo.id}/close`, {
+        const res = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/work-orders/${wo.id}/close`, {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(formValues)
         });
         const data = await res.json();
@@ -118,7 +118,7 @@ export default function WorkOrdersPage() {
   const handleViewReceipt = async (wo) => {
     try {
       Swal.fire({ title: 'Cargando recibo...', didOpen: () => Swal.showLoading() });
-      const res = await fetch(`http://localhost:8000/api/v1/tenants/${tenantId}/work-orders/${wo.id}/cost-breakdown`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tenantId}/work-orders/${wo.id}/cost-breakdown`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al obtener el recibo');
 

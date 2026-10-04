@@ -17,7 +17,7 @@ export default function DashboardPage() {
       try {
         const headers = { 'Authorization': `Bearer ${token}` };
         
-        const resTenants = await fetch('http://localhost:8000/api/v1/tenants/', { headers });
+        const resTenants = await fetch(' https://khazad-dum.onrender.com/api/v1/tenants/', { headers });
         const tenantsData = await resTenants.json();
         const tenants = tenantsData.items || tenantsData;
         if (tenants.length === 0) { setLoading(false); return; }
@@ -25,9 +25,9 @@ export default function DashboardPage() {
         const tid = tenants[0].id;
 
         const [resAssets, resWOs, resParts] = await Promise.all([
-          fetch(`http://localhost:8000/api/v1/tenants/${tid}/assets`, { headers }),
-          fetch(`http://localhost:8000/api/v1/tenants/${tid}/work-orders`, { headers }),
-          fetch(`http://localhost:8000/api/v1/tenants/${tid}/spare-parts`, { headers })
+          fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tid}/assets`, { headers }),
+          fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tid}/work-orders`, { headers }),
+          fetch(` https://khazad-dum.onrender.com/api/v1/tenants/${tid}/spare-parts`, { headers })
         ]);
 
                 const assetsRaw = resAssets.ok ? await resAssets.json() : [];
