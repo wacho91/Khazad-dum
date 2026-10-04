@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import Logo from '../components/ui/Logo';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -57,9 +58,11 @@ export default function LoginPage() {
 
       {/* Tarjeta de Login translúcida (Glassmorphism) */}
       <div className="relative z-10 max-w-md w-full bg-white/10 dark:bg-gray-800/30 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/20">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-white drop-shadow-lg">Khazad-Dum</h1>
-          <p className="text-sky-300 mt-2 text-sm font-medium tracking-wide">FACILITY MANAGEMENT SYSTEM</p>
+        <div className="flex flex-col items-center mb-8">
+          <div className="bg-slate-900/40 p-4 rounded-xl border border-white/10 mb-4 backdrop-blur-sm">
+            <Logo />
+          </div>
+          <p className="text-sky-300 text-sm font-medium tracking-wide">SISTEMA DE GESTIÓN DE ACTIVOS</p>
         </div>
         
         <form onSubmit={handleLogin} className="space-y-6">
