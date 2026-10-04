@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
+import Logo from '../ui/Logo';
 
 export default function AppLayout() {
   const navigate = useNavigate();
@@ -21,9 +22,9 @@ export default function AppLayout() {
     <div className="min-h-screen bg-slate-100 flex">
       
       {/* === BARRA SUPERIOR (Solo visible en celulares) === */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-slate-900 text-white p-4 flex items-center justify-between z-50">
-        <h1 className="text-xl font-bold text-sky-400">ManttoFlow 🏭</h1>
-        <button onClick={() => setIsSidebarOpen(true)} className="text-white focus:outline-none">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-slate-900 p-4 flex items-center justify-between z-50 border-b border-slate-800">
+        <Logo />
+        <button onClick={() => setIsSidebarOpen(true)} className="text-slate-300 focus:outline-none">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
       </div>
@@ -39,7 +40,7 @@ export default function AppLayout() {
       {/* === SIDEBAR (Menú Lateral) === */}
       <aside className={`fixed top-0 left-0 w-64 bg-slate-900 text-white flex flex-col p-4 h-full z-50 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="mb-8 px-4 py-4 mt-12 md:mt-0 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-sky-400">ManttoFlow 🏭</h1>
+          <Logo />
           {/* Botón de cerrar (Solo en móvil) */}
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
