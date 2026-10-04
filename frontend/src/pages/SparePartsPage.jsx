@@ -44,6 +44,13 @@ export default function SparePartsPage() {
     }
   };
 
+  // Lógica unificada: Si está cargando, muestra el componente centrado en toda la página
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <LoadingState />
+    </div>
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
@@ -173,7 +180,7 @@ export default function SparePartsPage() {
         <div className="md:col-span-2">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Inventario de Bodega</h2>
-            {loading ? <LoadingState /> : parts.length === 0 ? <p className="text-slate-400 italic">No hay repuestos registrados.</p> : (
+            {parts.length === 0 ? <p className="text-slate-400 italic">No hay repuestos registrados.</p> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">

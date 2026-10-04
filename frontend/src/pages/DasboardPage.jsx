@@ -57,7 +57,11 @@ export default function DashboardPage() {
 
   const formatCurrency = (value) => `$${Number(value || 0).toLocaleString('es-CO')}`;
 
-  if (loading) return <LoadingState />;
+    if (loading) return (
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+      <LoadingState />
+    </div>
+  );
 
   return (
     <div>

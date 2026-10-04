@@ -63,6 +63,13 @@ export default function WorkOrdersPage() {
     }
   };
 
+  // Lógica unificada: Si está cargando, muestra el componente centrado en toda la página
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <LoadingState />
+    </div>
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tenantId) return Swal.fire('Error', 'No se encontró la empresa.', 'error');
@@ -151,7 +158,6 @@ export default function WorkOrdersPage() {
     }
   };
 
-  // === LA MAGIA: VER EL RECIBO ===
   const handleViewReceipt = async (wo) => {
     try {
       Swal.fire({ title: 'Cargando recibo...', didOpen: () => Swal.showLoading() });
@@ -301,7 +307,7 @@ export default function WorkOrdersPage() {
         <div className="md:col-span-2">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Órdenes Activas e Historial</h2>
-            {loading ? <LoadingState /> : workOrders.length === 0 ? <p className="text-slate-400 italic">No hay órdenes de trabajo registradas.</p> : (
+            {workOrders.length === 0 ? <p className="text-slate-400 italic">No hay órdenes de trabajo registradas.</p> : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
