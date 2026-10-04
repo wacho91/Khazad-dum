@@ -30,10 +30,15 @@ export default function DashboardPage() {
           fetch(`http://localhost:8000/api/v1/tenants/${tid}/spare-parts`, { headers })
         ]);
 
-        const assetsData = resAssets.ok ? (await resAssets.json()).items || [] : [];
+                const assetsRaw = resAssets.ok ? await resAssets.json() : [];
+        const assetsData = assetsRaw.items ? assetsRaw.items : (Array.isArray(assetsRaw) ? assetsRaw : []);
+
         const woRaw = resWOs.ok ? await resWOs.json() : [];
         const wosData = woRaw.items ? woRaw.items : (Array.isArray(woRaw) ? woRaw : []);
 
+        const partsRaw = resParts.ok ? await resParts.json() : [];
+        const partsData = partsRaw.items ? partsRaw.items : (Array.isArray(partsRaw) ? partsRaw : []);
+        
         // 1. KPIs Básicos
         const openWOs = wosData.filter(wo => wo.status !== 'completed').length;
         const lowStock = partsData.filter(p => Number(p.stock_actual) <= Number(p.stock_minimo)).length;
